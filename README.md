@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-# SciAgent-RAG
-<<<<<<< HEAD
-=======
 # SciAgent-RAG(开发阶段，暂不可用)
->>>>>>> f06ee1a67557df1606798287ac42f5eb82444922
 
 ## 项目简介
 
@@ -40,6 +35,7 @@ SciAgent-RAG/
 - **后端**：Python, FastAPI, ChromaDB, LangGraph
 - **前端**：React, Vite
 - **数据库**：ChromaDB (向量数据库)
+- **包管理**：uv
 
 ## 安装和运行
 
@@ -50,12 +46,22 @@ SciAgent-RAG/
    cd sciagent-rag/backend
    ```
 
-2. 安装依赖
+2. 创建虚拟环境
    ```bash
-   pip install -e .
+   uv venv
    ```
 
-3. 运行服务
+3. 激活虚拟环境
+   ```bash
+   source .venv/bin/activate
+   ```
+
+4. 安装依赖
+   ```bash
+   uv pip install -e .
+   ```
+
+5. 运行服务
    ```bash
    python main.py
    ```
@@ -95,10 +101,3 @@ SciAgent-RAG/
 ## 许可证
 
 本项目采用 MIT 许可证。
-<<<<<<< HEAD
-=======
-SciAgent: 深度集成的智能交互科学仿真系统
->>>>>>> 0eebfb6a120471cc252ba040298ec27711386f9b
-=======
->>>>>>> f06ee1a67557df1606798287ac42f5eb82444922
-# SciAgent-RAG
