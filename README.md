@@ -1,4 +1,4 @@
-# SciAgent-RAG
+# SciAgent-RAG(开发阶段，暂不可用)
 
 ## 项目简介
 
