@@ -1,4 +1,5 @@
 # SciAgent-RAG
+<<<<<<< HEAD
 
 ## 项目简介
 
@@ -90,3 +91,6 @@ SciAgent-RAG/
 ## 许可证
 
 本项目采用 MIT 许可证。
+=======
+SciAgent: 深度集成的智能交互科学仿真系统
+>>>>>>> 0eebfb6a120471cc252ba040298ec27711386f9b
