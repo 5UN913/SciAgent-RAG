@@ -1,0 +1,147 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Simulation Command",
+  "description": "指令协议规范，用于 LLM 输出指令与前端仿真动作之间的通信",
+  "type": "object",
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "命令类型",
+      "enum": [
+        "start_simulation",
+        "pause_simulation",
+        "reset_simulation",
+        "set_parameter",
+        "move_object",
+        "apply_force",
+        "play_animation",
+        "change_scenario",
+        "get_state"
+      ]
+    },
+    "target": {
+      "type": "string",
+      "description": "操作目标，如 'slider', 'pendulum', 'spring' 等"
+    },
+    "parameters": {
+      "type": "object",
+      "description": "命令参数",
+      "properties": {
+        "mass": {
+          "type": "number",
+          "description": "质量"
+        },
+        "force": {
+          "type": "number",
+          "description": "力的大小"
+        },
+        "position": {
+          "type": "object",
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" },
+            "z": { "type": "number" }
+          },
+          "required": ["x", "y", "z"]
+        },
+        "velocity": {
+          "type": "object",
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" },
+            "z": { "type": "number" }
+          },
+          "required": ["x", "y", "z"]
+        },
+        "scenario": {
+          "type": "string",
+          "description": "场景类型",
+          "enum": ["newton_second_law", "pendulum", "spring", "collision", "projectile_motion"]
+        },
+        "h": {
+          "type": "number",
+          "description": "初始高度（平抛运动）"
+        },
+        "v0": {
+          "type": "number",
+          "description": "水平初速度（平抛运动）"
+        },
+        "g": {
+          "type": "number",
+          "description": "重力加速度"
+        },
+        "time_step": {
+          "type": "number",
+          "description": "时间步长"
+        },
+        "gravity": {
+          "type": "number",
+          "description": "重力加速度"
+        },
+        "animation": {
+          "type": "string",
+          "description": "动画名称，例如 walk / jump / slide"
+        },
+        "duration": {
+          "type": "number",
+          "description": "动画时长（秒）"
+        }
+      }
+    },
+    "reasoning": {
+      "type": "string",
+      "description": "AI 的推理过程，用于解释为什么执行此命令"
+    }
+  },
+  "required": ["command", "target"],
+  "examples": [
+    {
+      "command": "start_simulation",
+      "target": "projectile_motion",
+      "parameters": {
+        "h": 2,
+        "v0": 5,
+        "g": 10
+      },
+      "reasoning": "开始平抛运动实验，设置初始高度 2m，初速度 5m/s，重力加速度 10m/s²"
+    },
+    {
+      "command": "start_simulation",
+      "target": "newton_second_law",
+      "parameters": {
+        "mass": 0.1,
+        "force": 0.5
+      },
+      "reasoning": "开始牛顿第二定律实验，设置滑块质量为 0.1kg，施加 0.5N 的力"
+    },
+    {
+      "command": "move_object",
+      "target": "slider",
+      "parameters": {
+        "position": {
+          "x": -3,
+          "y": -1.5,
+          "z": 0
+        }
+      },
+      "reasoning": "将滑块移动到初始位置 (-3, -1.5, 0)"
+    },
+    {
+      "command": "apply_force",
+      "target": "slider",
+      "parameters": {
+        "force": 1.0
+      },
+      "reasoning": "对滑块施加 1.0N 的力，观察加速度变化"
+    },
+    {
+      "command": "play_animation",
+      "target": "slider",
+      "parameters": {
+        "animation": "slide",
+        "duration": 2.0
+      },
+      "reasoning": "播放滑块滑动动画"
+    }
+  ]
+}
