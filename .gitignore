@@ -1,6 +1,9 @@
 # IDE
 .idea/
 .vscode/
+
+# Trae IDE
+.trae/
 *.swp
 *.swo
 *~
