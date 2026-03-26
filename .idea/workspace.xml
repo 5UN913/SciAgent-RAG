@@ -4,27 +4,37 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d0424134-793e-4386-b94a-8625c62c5559" name="更改" comment="first" />
+    <list default="true" id="d0424134-793e-4386-b94a-8625c62c5559" name="更改" comment="first">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TREE.md" beforeDir="false" afterPath="$PROJECT_DIR$/TREE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sciagent-rag/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/sciagent-rag/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sciagent-rag/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/sciagent-rag/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sciagent-rag/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/sciagent-rag/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sciagent-rag/frontend/src/DebugAPI.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/sciagent-rag/frontend/src/DebugAPI.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sciagent-rag/frontend/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/sciagent-rag/frontend/src/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sciagent-rag/start-all.sh" beforeDir="false" afterPath="$PROJECT_DIR$/sciagent-rag/start-all.sh" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/sciagent-rag/backend" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "5UN913"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;5UN913&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/5UN913/SciAgent-RAG.git",
-    "accountId": "f79b84d8-d532-4a4a-ae5a-c02b3630d24f"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/5UN913/SciAgent-RAG.git&quot;,
+    &quot;accountId&quot;: &quot;f79b84d8-d532-4a4a-ae5a-c02b3630d24f&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
@@ -33,19 +43,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHELLCHECK.PATH": "我会在意",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/Users/shenxihan/SciAgent-RAG",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHELLCHECK.PATH&quot;: &quot;我会在意&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/shenxihan/SciAgent-RAG&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.mcp&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>

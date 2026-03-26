@@ -112,7 +112,7 @@ def execute_command(request: CommandRequest):
 
 @app.post("/command/generate")
 def generate_command(request: QuestionRequest):
-    """生成仿真命令接口"""
+    """生成仿真命令接口（保留向后兼容）"""
     try:
         # 生成命令
         command = rag_manager.generate_command(request.question)
@@ -133,6 +133,52 @@ def generate_command(request: QuestionRequest):
             return {"status": "warning", "message": "生成的命令格式可能不正确", "raw_command": command}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"生成命令时出错：{str(e)}")
+
+
+@app.post("/code/generate")
+def generate_code(request: QuestionRequest):
+    """生成 Three.js 动画代码接口"""
+    try:
+        # 生成代码
+        code_response = rag_manager.generate_command(request.question)
+        
+        # 尝试解析 JSON 响应
+        import json
+        try:
+            result = json.loads(code_response)
+            if "code" in result:
+                return {
+                    "status": "success",
+                    "code": result.get("code", ""),
+                    "reasoning": result.get("reasoning", ""),
+                    "raw_response": code_response
+                }
+        except json.JSONDecodeError:
+            # 如果不是有效的 JSON，尝试提取代码
+            import re
+            code_match = re.search(r'```(?:javascript|js)?\s*([\s\S]*?)\s*```', code_response)
+            if code_match:
+                return {
+                    "status": "success",
+                    "code": code_match.group(1),
+                    "reasoning": "从响应中提取的代码",
+                    "raw_response": code_response
+                }
+            else:
+                return {
+                    "status": "success",
+                    "code": code_response,
+                    "reasoning": "直接返回的代码",
+                    "raw_response": code_response
+                }
+        
+        return {
+            "status": "warning",
+            "message": "未能正确解析代码响应",
+            "raw_response": code_response
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"生成代码时出错：{str(e)}")
 
 @app.post("/rag/documents/upload")
 async def upload_document(file: UploadFile = File(...)):

@@ -4,19 +4,15 @@ from langchain_core.output_parsers import StrOutputParser
 from vector_db_manager import ChromaDBManager
 from command_prompt_manager import PromptManager
 from llm_factory import LLMFactory
+import json
+import re
 
 class RAGManager:
     def __init__(self):
-        # 初始化 ChromaDB 管理器
         self.db_manager = ChromaDBManager()
-        
-        # 初始化提示词管理器
         self.prompt_manager = PromptManager()
-        
-        # 使用 LLM 工厂创建 LLM 实例
         self.llm = LLMFactory.create_llm()
         
-        # 定义 RAG 提示模板
         self.prompt_template = ChatPromptTemplate.from_template(
             """你是一个专业的物理/化学教师，基于以下参考资料回答学生的问题。
 
@@ -34,18 +30,16 @@ class RAGManager:
 """
         )
         
-        # 定义命令生成提示模板
         self.command_prompt_template = ChatPromptTemplate.from_template(
             """{system_prompt}
 
 用户问题：
 {question}
 
-请生成符合 JSON Schema 规范的控制命令：
+请生成符合要求的代码：
 """
         )
         
-        # 构建 RAG 链
         self.rag_chain = (
             {
                 "context": self.retrieve_documents,
@@ -56,10 +50,9 @@ class RAGManager:
             | StrOutputParser()
         )
         
-        # 构建命令生成链
         self.command_chain = (
             {
-                "system_prompt": lambda x: self.prompt_manager.get_combined_prompt(x.get("scene")),
+                "system_prompt": lambda x: self.prompt_manager.get_combined_prompt(),
                 "question": lambda x: x.get("question")
             }
             | self.command_prompt_template
@@ -68,19 +61,16 @@ class RAGManager:
         )
     
     def retrieve_documents(self, question):
-        """从向量数据库中检索相关文档"""
         results = self.db_manager.query(question, n_results=3)
         documents = results.get('documents', [[]])[0]
         context = "\n".join(documents)
         return context
     
     def generate_answer(self, question):
-        """生成基于检索结果的回答"""
         try:
             answer = self.rag_chain.invoke(question)
             return answer
         except Exception as e:
-            # 模拟回答，用于测试
             if "API key" in str(e):
                 context = self.retrieve_documents(question)
                 if "公式" in question or "什么" in question:
@@ -90,118 +80,55 @@ class RAGManager:
             return f"生成回答时出错：{str(e)}"
     
     def get_retrieval_stats(self):
-        """获取检索统计信息"""
         return self.db_manager.get_collection_stats()
     
-    def detect_scene(self, question):
-        """根据问题内容检测应该使用的场景"""
-        question_lower = question.lower()
-        
-        if "平抛" in question or "projectile" in question_lower or "抛体" in question:
-            return "projectile_motion"
-        elif "牛顿" in question or "newton" in question_lower or "第二定律" in question:
-            return "newton_second_law"
-        elif "单摆" in question or "pendulum" in question_lower:
-            return "pendulum"
-        elif "弹簧" in question or "spring" in question_lower:
-            return "spring"
-        elif "碰撞" in question or "collision" in question_lower:
-            return "collision"
-        
-        return "projectile_motion"  # 默认返回平抛运动
-    
     def generate_command(self, question, scene=None):
-        """生成符合 JSON Schema 规范的控制命令"""
         try:
-            if not scene:
-                scene = self.detect_scene(question)
-            
-            command = self.command_chain.invoke({
-                "question": question,
-                "scene": scene
+            code = self.command_chain.invoke({
+                "question": question
             })
-            return command
+            return code
         except Exception as e:
-            # 模拟命令，用于测试
             if "API key" in str(e):
-                scene = self.detect_scene(question)
-                if scene == "projectile_motion":
-                    import re
-                    h = 2
-                    v0 = 5
-                    g = 10
-                    
-                    h_match = re.search(r'h\s*[=:]\s*(\d+(?:\.\d+)?)', question)
-                    if h_match:
-                        h = float(h_match.group(1))
-                    
-                    v0_match = re.search(r'v0\s*[=:]\s*(\d+(?:\.\d+)?)', question)
-                    if v0_match:
-                        v0 = float(v0_match.group(1))
-                    
-                    g_match = re.search(r'g\s*[=:]\s*(\d+(?:\.\d+)?)', question)
-                    if g_match:
-                        g = float(g_match.group(1))
-                    
-                    return f'''{{
-  "command": "start_simulation",
-  "target": "projectile_motion",
-  "parameters": {{
-    "h": {h},
-    "v0": {v0},
-    "g": {g}
-  }},
-  "reasoning": "开始平抛运动实验，设置初始高度 {h}m，初速度 {v0}m/s，重力加速度 {g}m/s²"
-}}'''
-                elif "开始" in question or "启动" in question:
-                    return '''{
-  "command": "start_simulation",
-  "target": "newton_second_law",
-  "parameters": {
-    "mass": 0.1,
-    "force": 0.5
-  },
-  "reasoning": "开始牛顿第二定律实验，设置滑块质量为 0.1kg，施加 0.5N 的力"
-}'''
-                elif "暂停" in question:
-                    return '''{
-  "command": "pause_simulation",
-  "target": "newton_second_law",
-  "reasoning": "暂停仿真"
-}'''
-                elif "重置" in question:
-                    return '''{
-  "command": "reset_simulation",
-  "target": "newton_second_law",
-  "reasoning": "重置仿真到初始状态"
-}'''
-            return f"生成命令时出错：{str(e)}"
+                return self._generate_mock_code(question)
+            return json.dumps({"code": "", "reasoning": f"生成代码时出错：{str(e)}"})
+    
+    def _generate_mock_code(self, question):
+        h = 2
+        v0 = 5
+        g = 10
+        
+        h_match = re.search(r'h\s*[=:]\s*(\d+(?:\.\d+)?)', question)
+        if h_match:
+            h = float(h_match.group(1))
+        
+        v0_match = re.search(r'v0\s*[=:]\s*(\d+(?:\.\d+)?)', question)
+        if v0_match:
+            v0 = float(v0_match.group(1))
+        
+        g_match = re.search(r'g\s*[=:]\s*(\d+(?:\.\d+)?)', question)
+        if g_match:
+            g = float(g_match.group(1))
+        
+        if "平抛" in question or "projectile" in question.lower() or "抛体" in question:
+            return json.dumps({
+                "code": "// 平抛运动实验\nconst objects = [];\nconst trails = [];\n\nfunction setupScene() {\n  const tableGeometry = new THREE.BoxGeometry(2, 0.2, 1);\n  const tableMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });\n  const table = new THREE.Mesh(tableGeometry, tableMaterial);\n  table.position.set(-3, " + str(h) + ", 0);\n  scene.add(table);\n  objects.push(table);\n  const ballGeometry = new THREE.SphereGeometry(0.2, 32, 32);\n  const ballMaterial = new THREE.MeshStandardMaterial({ color: 0xff6600 });\n  const ball = new THREE.Mesh(ballGeometry, ballMaterial);\n  ball.position.set(-2, " + str(h + 0.2) + ", 0);\n  ball.userData = { startTime: Date.now(), initialX: -2, initialY: " + str(h + 0.2) + ", v0: " + str(v0) + ", g: " + str(g) + " };\n  scene.add(ball);\n  objects.push(ball);\n}\n\nfunction update(deltaTime) {\n  const ball = objects.find(obj => obj.geometry && obj.geometry.type === 'SphereGeometry');\n  if (ball && ball.userData) {\n    const elapsed = (Date.now() - ball.userData.startTime) / 1000;\n    const x = ball.userData.initialX + ball.userData.v0 * elapsed;\n    const y = ball.userData.initialY - 0.5 * ball.userData.g * elapsed * elapsed;\n    if (y >= -2) {\n      ball.position.set(x, y, 0);\n      const trailGeometry = new THREE.SphereGeometry(0.05, 8, 8);\n      const trailMaterial = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.6 });\n      const trail = new THREE.Mesh(trailGeometry, trailMaterial);\n      trail.position.copy(ball.position);\n      scene.add(trail);\n      trails.push(trail);\n      if (trails.length > 100) {\n        const oldTrail = trails.shift();\n        scene.remove(oldTrail);\n      }\n    } else {\n      ball.position.y = -1.8;\n    }\n  }\n}\n\nfunction cleanup() {\n  objects.forEach(obj => scene.remove(obj));\n  trails.forEach(trail => scene.remove(trail));\n  objects.length = 0;\n  trails.length = 0;\n}\n\nsetupScene();\nanimate(update);",
+                "reasoning": f"生成平抛运动实验代码，设置初始高度 {h}m，初速度 {v0}m/s，重力加速度 {g}m/s²"
+            })
+        elif "牛顿" in question or "newton" in question.lower() or "第二定律" in question:
+            return json.dumps({
+                "code": "// 牛顿第二定律实验\nconst objects = [];\nfunction setupScene() {\n  const groundGeometry = new THREE.BoxGeometry(10, 0.5, 4);\n  const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x88aa88 });\n  const ground = new THREE.Mesh(groundGeometry, groundMaterial);\n  ground.position.set(0, -2.25, 0);\n  scene.add(ground);\n  objects.push(ground);\n  const boxGeometry = new THREE.BoxGeometry(0.8, 0.5, 0.6);\n  const boxMaterial = new THREE.MeshStandardMaterial({ color: 0x4488ff });\n  const box = new THREE.Mesh(boxGeometry, boxMaterial);\n  box.position.set(-4, -1.75, 0);\n  box.userData = { velocity: 0, mass: 0.1, force: 0.5 };\n  scene.add(box);\n  objects.push(box);\n}\n\nfunction update(deltaTime) {\n  const box = objects.find(obj => obj.userData && obj.userData.mass);\n  if (box && box.userData) {\n    const a = box.userData.force / box.userData.mass;\n    box.userData.velocity += a * deltaTime;\n    box.position.x += box.userData.velocity * deltaTime;\n    if (box.position.x > 5) {\n      box.position.x = -4;\n      box.userData.velocity = 0;\n    }\n  }\n}\n\nfunction cleanup() {\n  objects.forEach(obj => scene.remove(obj));\n  objects.length = 0;\n}\n\nsetupScene();\nanimate(update);",
+                "reasoning": "生成牛顿第二定律实验代码，展示滑块在力的作用下加速运动"
+            })
+        else:
+            return json.dumps({
+                "code": "// 自由落体实验\nconst objects = [];\nfunction setupScene() {\n  const groundGeometry = new THREE.BoxGeometry(10, 0.5, 4);\n  const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x88aa88 });\n  const ground = new THREE.Mesh(groundGeometry, groundMaterial);\n  ground.position.set(0, -2.25, 0);\n  scene.add(ground);\n  objects.push(ground);\n  const ballGeometry = new THREE.SphereGeometry(0.3, 32, 32);\n  const ballMaterial = new THREE.MeshStandardMaterial({ color: 0xff6600 });\n  const ball = new THREE.Mesh(ballGeometry, ballMaterial);\n  ball.position.set(0, 3, 0);\n  ball.userData = { startTime: Date.now(), initialY: 3, g: 9.8 };\n  scene.add(ball);\n  objects.push(ball);\n}\n\nfunction update(deltaTime) {\n  const ball = objects.find(obj => obj.geometry && obj.geometry.type === 'SphereGeometry');\n  if (ball && ball.userData) {\n    const elapsed = (Date.now() - ball.userData.startTime) / 1000;\n    const y = ball.userData.initialY - 0.5 * ball.userData.g * elapsed * elapsed;\n    if (y >= -1.7) {\n      ball.position.y = y;\n    } else {\n      ball.position.y = -1.7;\n    }\n  }\n}\n\nfunction cleanup() {\n  objects.forEach(obj => scene.remove(obj));\n  objects.length = 0;\n}\n\nsetupScene();\nanimate(update);",
+                "reasoning": "生成自由落体实验代码作为示例"
+            })
 
-# 示例用法
 if __name__ == "__main__":
     rag_manager = RAGManager()
-    
-    # 测试 RAG 功能
     question = "牛顿第二定律的公式是什么？"
     answer = rag_manager.generate_answer(question)
     print(f"问题：{question}")
     print(f"回答：{answer}")
-    
-    # 测试另一个问题
-    question2 = "如何验证牛顿第二定律？"
-    answer2 = rag_manager.generate_answer(question2)
-    print(f"\n问题：{question2}")
-    print(f"回答：{answer2}")
-    
-    # 测试命令生成功能
-    command_question = "开始牛顿第二定律实验"
-    command = rag_manager.generate_command(command_question)
-    print(f"\n命令生成测试：")
-    print(f"问题：{command_question}")
-    print(f"命令：{command}")
-    
-    # 测试暂停命令
-    pause_question = "暂停仿真"
-    pause_command = rag_manager.generate_command(pause_question)
-    print(f"\n问题：{pause_question}")
-    print(f"命令：{pause_command}")

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # SciAgent-RAG 一键启动脚本
-# 使用内置 Three.js 模式
+# 使用 LLM 代码驱动 + Rapier 物理引擎模式
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -13,7 +13,9 @@ echo ""
 
 # 检查环境
 check_env() {
-  echo "✅ 使用内置 Three.js 仿真引擎"
+  echo "✅ 使用 LLM 代码驱动模式"
+  echo "✅ 集成 Rapier3D 物理引擎"
+  echo "✅ 支持动态 Three.js 代码执行"
   echo ""
 }
 
@@ -129,10 +131,9 @@ main() {
   echo "=========================================="
   echo ""
   echo "📱 前端地址:  http://localhost:3000"
-  echo "              或 http://localhost:3001"
   echo "🔧 后端地址:  http://localhost:8001"
   echo ""
-  echo "🎮 模式:      内置 Three.js 仿真引擎"
+  echo "🎮 模式:      LLM 代码驱动 + Rapier 物理引擎"
   echo ""
   echo "按 Ctrl+C 停止所有服务"
   echo "=========================================="
