@@ -193,6 +193,20 @@ code {
   cursor: not-allowed;
 }
 
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.animation-button {
+  background: #28a745;
+}
+
+.animation-button:hover:not(:disabled) {
+  background: #218838;
+}
+
 .ai-button.danger {
   background: #dc3545;
 }
@@ -207,6 +221,57 @@ code {
   background: #f8f9fa;
   border-radius: 4px;
   border-left: 4px solid #007bff;
+}
+
+.execution-status {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 4px solid #6c757d;
+}
+
+.execution-status p {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 5px 0 0 0;
+}
+
+.execution-status p.success {
+  color: #28a745;
+}
+
+.execution-status p.error {
+  color: #dc3545;
+}
+
+.code-display {
+  margin-top: 20px;
+  padding: 15px;
+  background: #1e1e1e;
+  border-radius: 4px;
+  border-left: 4px solid #667eea;
+}
+
+.code-display h3 {
+  color: #d4d4d4;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.code-content {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 15px;
+  border-radius: 4px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .upload-area {
