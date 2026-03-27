@@ -496,6 +496,137 @@ code {
   padding-bottom: 10px;
 }
 
+.api-mode-toggle {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.api-mode-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.api-mode-toggle input[type="checkbox"] {
+  accent-color: #667eea;
+}
+
+.solution-display {
+  margin-top: 20px;
+}
+
+.solution-steps {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 4px solid #28a745;
+}
+
+.solution-steps ol {
+  padding-left: 20px;
+}
+
+.solution-steps li {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.physics-params {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 4px solid #667eea;
+}
+
+.params-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.param-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: #e9ecef;
+  border-radius: 16px;
+  font-size: 0.9rem;
+}
+
+.param-chip .param-key {
+  font-weight: 600;
+  color: #495057;
+}
+
+.param-chip .param-value {
+  color: #667eea;
+  font-weight: 500;
+}
+
+.animation-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.animation-controls .control-btn {
+  padding: 6px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  color: #495057;
+}
+
+.animation-controls .control-btn:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.animation-controls .control-btn.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.animation-controls .control-btn.play-btn {
+  font-size: 1.1rem;
+  min-width: 40px;
+}
+
+.animation-controls .speed-group {
+  display: flex;
+  gap: 4px;
+}
+
+.animation-controls .time-display {
+  font-family: monospace;
+  font-size: 0.95rem;
+  color: #495057;
+  margin-left: auto;
+  padding: 4px 10px;
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.animation-controls .control-separator {
+  width: 1px;
+  height: 24px;
+  background: #dee2e6;
+}
+
 @media (max-width: 768px) {
   .main-content {
     flex-direction: column;
