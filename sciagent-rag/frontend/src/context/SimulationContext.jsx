@@ -10,6 +10,12 @@ export function useSimulation() {
   return ctx;
 }
 
+export const CANVAS_SIZES = {
+  compact: 250,
+  normal: 400,
+  expanded: 600,
+};
+
 export function SimulationProvider({ children }) {
   // Three.js refs — owned by SimulationCanvas, consumed by CodeSandbox
   const sceneRef = useRef(null);
@@ -20,6 +26,7 @@ export function SimulationProvider({ children }) {
   const currentCleanupRef = useRef(null);
   const lastTimeRef = useRef(Date.now());
   const containerRef = useRef(null);
+  const simulationAreaRef = useRef(null);
 
   // Engine readiness
   const [isReady, setIsReady] = useState(false);
@@ -42,14 +49,73 @@ export function SimulationProvider({ children }) {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(10);
 
+  // Canvas size & fullscreen state
+  const [canvasSize, setCanvasSize] = useState('normal'); // 'compact' | 'normal' | 'expanded'
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   const togglePlay = useCallback(() => setIsPlaying(prev => !prev), []);
+
+  const stepForward = useCallback(() => {
+    const dt = (1 / 60) * speed;
+    const world = worldRef.current;
+    if (world) {
+      try { world.step(); } catch { /* world may be disposed */ }
+    }
+    animationCallbacksRef.current.forEach((callback) => {
+      try {
+        callback(dt);
+      } catch (err) {
+        console.error('Step callback error:', err);
+      }
+    });
+    setElapsedTime(prev => prev + dt);
+  }, [speed]);
+
+  const seekToTime = useCallback((time) => {
+    setElapsedTime(Math.max(0, time));
+  }, []);
+
   const resetAnimation = useCallback(() => {
     setElapsedTime(0);
     setIsPlaying(true);
   }, []);
+
   const updateElapsedTime = useCallback((delta) => {
     setElapsedTime(prev => prev + delta);
   }, []);
+
+  const enterFullscreen = useCallback(() => {
+    const el = simulationAreaRef.current;
+    if (!el) return;
+    if (el.requestFullscreen) {
+      el.requestFullscreen();
+    } else if (el.webkitRequestFullscreen) {
+      el.webkitRequestFullscreen();
+    }
+  }, []);
+
+  const exitFullscreen = useCallback(() => {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+    }
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    if (isFullscreen) {
+      exitFullscreen();
+    } else {
+      enterFullscreen();
+    }
+  }, [isFullscreen, enterFullscreen, exitFullscreen]);
+
+  const setCanvasSizeWithCleanup = useCallback((size) => {
+    setCanvasSize(size);
+  }, []);
+
   const resetScene = useCallback(() => {
     animationCallbacksRef.current = [];
 
@@ -117,6 +183,7 @@ export function SimulationProvider({ children }) {
     currentCleanupRef,
     lastTimeRef,
     containerRef,
+    simulationAreaRef,
 
     // Engine state
     isReady,
@@ -152,8 +219,17 @@ export function SimulationProvider({ children }) {
     totalDuration,
     setTotalDuration,
     togglePlay,
+    stepForward,
+    seekToTime,
     resetAnimation,
     updateElapsedTime,
+
+    // Canvas size & fullscreen
+    canvasSize,
+    setCanvasSize: setCanvasSizeWithCleanup,
+    isFullscreen,
+    setIsFullscreen,
+    toggleFullscreen,
 
     // Actions
     resetScene,

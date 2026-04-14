@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import SimulationCanvas from '../components/SimulationCanvas';
 import ChatPanel from '../components/ChatPanel';
@@ -23,7 +23,23 @@ function SimulationPage() {
     animationCallbacksRef,
     currentCleanupRef,
     containerRef,
+    simulationAreaRef,
+    isFullscreen,
+    toggleFullscreen,
   } = useSimulation();
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'f' || e.key === 'F') {
+        const tag = e.target.tagName.toLowerCase();
+        if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleFullscreen]);
 
   const runPreset = (code, label) => {
     if (!isReady) {
@@ -47,8 +63,13 @@ function SimulationPage() {
       </header>
 
       <main className="main-content">
-        <section className="simulation-area">
-          <h2>物理仿真场景</h2>
+        <section
+          ref={simulationAreaRef}
+          className={`simulation-area${isFullscreen ? ' simulation-area--fullscreen' : ''}`}
+        >
+          <h2 className={`simulation-title${isFullscreen ? ' simulation-title--fullscreen' : ''}`}>
+            物理仿真场景
+          </h2>
           <SimulationCanvas />
           <AnimationControls />
           <div className="controls">

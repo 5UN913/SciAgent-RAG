@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import RAPIER from '@dimforge/rapier3d-compat';
-import { useSimulation } from '../context/SimulationContext';
+import { useSimulation, CANVAS_SIZES } from '../context/SimulationContext';
 
 let rapierReady = false;
 let rapierInitPromise = null;
@@ -21,6 +21,7 @@ function SimulationCanvas() {
   const animationIdRef = useRef(null);
   const controlsRef = useRef(null);
   const initDoneRef = useRef(false);
+  const resizeObserverRef = useRef(null);
 
   const {
     sceneRef,
@@ -34,6 +35,9 @@ function SimulationCanvas() {
     isPlaying,
     speed,
     updateElapsedTime,
+    canvasSize,
+    isFullscreen,
+    setIsFullscreen,
   } = useSimulation();
 
   const isPlayingRef = useRef(true);
@@ -43,6 +47,26 @@ function SimulationCanvas() {
     isPlayingRef.current = isPlaying;
     speedRef.current = speed;
   }, [isPlaying, speed]);
+
+  const handleResize = useCallback(() => {
+    const container = containerRef.current;
+    const camera = cameraRef.current;
+    const renderer = rendererRef.current;
+    if (!container || !camera || !renderer) return;
+
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    if (w === 0 || h === 0) return;
+
+    const viewSize = 20;
+    const newAspect = w / h;
+    camera.left = -viewSize * newAspect / 2;
+    camera.right = viewSize * newAspect / 2;
+    camera.top = viewSize / 2;
+    camera.bottom = -viewSize / 2;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  }, [containerRef, cameraRef, rendererRef]);
 
   useEffect(() => {
     let disposed = false;
@@ -54,9 +78,7 @@ function SimulationCanvas() {
       const container = containerRef.current;
       if (!container) return;
 
-      // Prevent double-init from StrictMode remount if already set up
       if (initDoneRef.current && sceneRef.current && rendererRef.current) {
-        // Re-attach renderer to container if it was removed during cleanup
         if (!container.firstChild && rendererRef.current.domElement) {
           container.appendChild(rendererRef.current.domElement);
         }
@@ -68,7 +90,6 @@ function SimulationCanvas() {
       scene.background = new THREE.Color(0xffffff);
       sceneRef.current = scene;
 
-      // OrthographicCamera — flat 2D view on XY plane
       const viewSize = 20;
       const aspect = container.clientWidth / container.clientHeight;
       const camera = new THREE.OrthographicCamera(
@@ -101,11 +122,9 @@ function SimulationCanvas() {
       controls.update();
       controlsRef.current = controls;
 
-      // Flat lighting — no shadows
       const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
       scene.add(ambientLight);
 
-      // Ground line at y=0
       const groundLineGeometry = new THREE.BufferGeometry().setFromPoints([
         new THREE.Vector3(-100, 0, 0),
         new THREE.Vector3(100, 0, 0),
@@ -115,10 +134,8 @@ function SimulationCanvas() {
       groundLine.userData.isGround = true;
       scene.add(groundLine);
 
-      // Grid lines for spatial reference
       const gridLineMaterial = new THREE.LineBasicMaterial({ color: 0xe0e0e0 });
 
-      // Vertical grid lines every 5 units
       for (let x = -100; x <= 100; x += 5) {
         const geometry = new THREE.BufferGeometry().setFromPoints([
           new THREE.Vector3(x, -100, 0),
@@ -129,9 +146,8 @@ function SimulationCanvas() {
         scene.add(line);
       }
 
-      // Horizontal grid lines every 5 units
       for (let y = -100; y <= 100; y += 5) {
-        if (y === 0) continue; // skip y=0 — already drawn as ground line
+        if (y === 0) continue;
         const geometry = new THREE.BufferGeometry().setFromPoints([
           new THREE.Vector3(-100, y, 0),
           new THREE.Vector3(100, y, 0),
@@ -146,21 +162,7 @@ function SimulationCanvas() {
 
       initDoneRef.current = true;
 
-      const handleResize = () => {
-        if (!container || disposed) return;
-        const w = container.clientWidth;
-        const h = container.clientHeight;
-        const newAspect = w / h;
-        camera.left = -viewSize * newAspect / 2;
-        camera.right = viewSize * newAspect / 2;
-        camera.top = viewSize / 2;
-        camera.bottom = -viewSize / 2;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
-      };
       window.addEventListener('resize', handleResize);
-      container._resizeCleanup = () => window.removeEventListener('resize', handleResize);
-
       startRenderLoop();
       setIsReady(true);
     };
@@ -213,6 +215,7 @@ function SimulationCanvas() {
 
     return () => {
       disposed = true;
+      window.removeEventListener('resize', handleResize);
       if (animationIdRef.current) {
         cancelAnimationFrame(animationIdRef.current);
         animationIdRef.current = null;
@@ -220,10 +223,57 @@ function SimulationCanvas() {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ResizeObserver for container size changes (canvas size toggle, fullscreen)
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    resizeObserverRef.current = new ResizeObserver(() => {
+      handleResize();
+    });
+    resizeObserverRef.current.observe(container);
+
+    return () => {
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+      }
+    };
+  }, [handleResize]);
+
+  // Fullscreen change event listener
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+      setIsFullscreen(!!fsEl);
+      setTimeout(handleResize, 100);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    };
+  }, [setIsFullscreen, handleResize]);
+
+  // Resize renderer when canvasSize or isFullscreen changes
+  useEffect(() => {
+    const timer1 = setTimeout(handleResize, 50);
+    const timer2 = setTimeout(handleResize, 350);
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [canvasSize, isFullscreen, handleResize]);
+
+  const canvasHeight = CANVAS_SIZES[canvasSize] || 400;
+
   return (
     <div
       ref={containerRef}
-      className="simulation-canvas"
+      className={`simulation-canvas ${canvasSize}`}
+      style={isFullscreen ? { height: '100%' } : { height: `${canvasHeight}px` }}
     />
   );
 }
